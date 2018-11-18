@@ -1,1 +1,0 @@
-# Social-Network-Anaylsis-on-the-PIRA
