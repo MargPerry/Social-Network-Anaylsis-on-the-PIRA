@@ -36,3 +36,9 @@ edges3<-read.csv("/Users/emilygeng/Downloads/CSV/60_PERIOD3_NET.csv", header=TRU
 ```{r}
 test<- ergm(edges_1~edges)
 ```
+
+## Block model 
+```{r}
+
+```
+
