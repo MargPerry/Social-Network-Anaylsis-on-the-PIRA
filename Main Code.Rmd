@@ -1,0 +1,26 @@
+---
+title: "Main Code"
+author: "Margaret Perry"
+date: "November 18, 2018"
+output: pdf_document
+---
+
+```{r}
+library(readr)
+library(igraph)
+library(sna)
+library(sand)
+```
+#Period 1
+##import data 
+```{r}
+attribute_1 <- read_csv("C:/Users/mperr/Desktop/CSV/60_PERIOD1_ATTT.csv")
+edges_1<- read_csv("C:/Users/mperr/Desktop/CSV/60_PERIOD1_NET.csv")
+View(attributes_1)
+```
+
+##Visualizing 
+
+```{r}
+test<- ergm(edges_1~edges)
+```
