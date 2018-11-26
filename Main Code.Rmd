@@ -11,8 +11,9 @@ library(igraph)
 library(sna)
 library(sand)
 library(blockmodels)
+library(sna)
 ```
-#Period 1
+
 ##import data 
 
 ```{r}
@@ -26,7 +27,8 @@ edges2<-read.csv("CSV/60_PERIOD2_NET.csv", header=TRUE)
 edges3<-read.csv("CSV/60_PERIOD3_NET.csv", header=TRUE)
 ```
 
-#creating adjency matrix for the three dataset 
+## creating adjency matrix for the three dataset 
+
 ```{r}
 # change character form into numarical form:
 adj.matrix.1<-as.matrix(edges1)[,-1] # make sure as many columns as rows
@@ -40,7 +42,8 @@ class(adj.matrix.3)<-"numeric"
 
 ```
 
-# examing missing data 
+## examing missing data 
+
 Here we can compare the number of missing data with the number of total data
 ```{r}
 nrow(data1[data1$Marital.Status!=99999,]) # see valid data with marrital status not missing for data 1
@@ -55,31 +58,16 @@ nrow(data3)
 ##Visualizing 
 
 ```{r}
-test<- ergm(edges_1~edges)
+gplot(adj.matrix.1,main="Period 1", vertex.col="Blue")
+gplot(adj.matrix.2,main="Period 2", vertex.col="Purple")
+gplot(adj.matrix.3,main="Period 3", vertex.col = "Orange")
+
 ```
 
-## Mixer? 
-```{r}
-require(devtools)
-install_version("mixer", version = "1.9", repos = "http://cran.us.r-project.org")
-
-setSeed(42)
-fblog.sbm <- mixer(as.matrix(get.adjacency(fblog)), 4 + qmin=2, qmax=15)
-
-install.packages("RcppArmadillo")
-library(RcppArmadillo)
-```
 
 ## Blockmodel 
 ```{r}
-adj.matrix<-as.matrix(edges3)[,-1] # make sure as many columns as rows
-
-adj.matrix.n<-adj.matrix
-
-class(adj.matrix.n)<-"numeric"
-
-library(sna)
-gplot(adj.matrix.n)
+gplot(adj.matrix.1)
 
 my_model<-BM_bernoulli(
 "SBM",
