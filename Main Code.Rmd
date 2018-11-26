@@ -30,6 +30,5 @@ edges3<-read.csv("CSV/60_PERIOD3_NET.csv", header=TRUE)
 ##Visualizing 
 
 ```{r}
-test<- ergm(edges1~edges)
-summary(test)
+;
 ```
