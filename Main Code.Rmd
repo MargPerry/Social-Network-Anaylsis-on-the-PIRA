@@ -3,6 +3,8 @@ title: "Main Code"
 author: "Margaret Perry"
 date: "November 18, 2018"
 output: pdf_document
+editor_options: 
+  chunk_output_type: inline
 ---
 
 ```{r setup, include=FALSE}
@@ -67,64 +69,38 @@ gplot(adj.matrix.3,main="Period 3", vertex.col = "Orange")
 
 ## Blockmodel 
 ```{r}
-gplot(adj.matrix.1)
-
 my_model<-BM_bernoulli(
 "SBM",
-adj.matrix.n,
+adj.matrix.1,
 verbosity=6,
 autosave='',
 plotting=character(0),
 exploration_factor=1.5,
-explore_min=4,
-explore_max=Inf,
+explore_min=2,
+explore_max=7,
 ncores=detectCores())
 
-#my_model <- BM_bernoulli_multiplex("SBM",list(adj.matrix), plotting='', explore_min=2, explore_max=2, ncores=2, verbosity=0)
 my_model$estimate()
 
 which.max(my_model$ICL)
 
-num.clusters<-3 #use number from which.max command above
-my_model$memberships[[num.clusters]]$Z #gives probability of being in each group
-my_model$memberships[[num.clusters]]$plot() #plots the group memberships
-
-
-
-```
-
-# Block Model Version 2
-
-We are going to simulate our own network 
-```{r}
-## generation of one SBM network
-npc <- 30 # nodes per class
-Q <- 3 # classes
-n <- npc * Q # nodes
-Z<-diag(Q)%x%matrix(1,npc,1) #??
-P<-matrix(runif(Q*Q),Q,Q) # matrix for classes 
-M<-1*(matrix(runif(n*n),n,n)<Z%*%P%*%t(Z)) ## adjacency matrix; t is transpose of matrix Z
-
-```
-Let's see what we get back when we run a SBM on this simulated network
-```{r}
-my_model <- BM_bernoulli("SBM", M)
-my_model$estimate()
-which.max(my_model$ICL)
-num.clusters<-3
-my_model$memberships[[num.clusters]]$Z #gives probability of being in each group
+num.clusters<-4 #use number from which.max command above
+my_model$memberships[[num.clusters]]$Z#gives probability of being in each group
+test1=my_model$memberships[[num.clusters]]$Z>0.6
+test1
 my_model$memberships[[num.clusters]]$plot() #plots the group memberships
 ```
+We see that there are likely to have four to five groups within the whole dataset. Now we are going to calculate the likelookd for each individual of being in those groups based on some of their specific background information. 
 
-# latent model 
-
-
+## Multinomial Logistic Regression 
 ```{r}
-library(eigenmodel)
-lazega.leig.fit1 <- eigenmodel_mcmc(adj.matrix, R=2, S=11000,
-burn=10000)
+require(foreign)
+require(nnet)
+require(ggplot2)
+require(reshape2)
+data1
+test <- multinom( ~ Gender + Marital.Status, data = data1)
+
 ```
-
-
-
-
+# Discussion
+We can then run the regression 
