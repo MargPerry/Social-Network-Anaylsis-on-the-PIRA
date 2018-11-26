@@ -1,0 +1,16 @@
+PKG_CXXFLAGS=-I.
+NOOPT_FFLAGS=-O0
+
+all : $(SHLIB) 
+
+dlamch.o : dlamch.f
+	 $(F77) $(NOOPT_FFLAGS) $(FPICFLAGS) -c  dlamch.f 
+
+lsame.o : lsame.f
+	 $(F77) $(NOOPT_FFLAGS) $(FPICFLAGS) -c  lsame.f
+
+dnrm2.o : dnrm2.f
+	$(F77) $(ASSIGN_FFLAGS) $(FPICFLAGS) -c dnrm2.f
+
+
+

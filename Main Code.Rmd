@@ -13,22 +13,84 @@ library(sand)
 library(ergm)
 ```
 
+#Period 1
+##import data 
+
 
 ```{r}
+
 ##import data 
 library(igraph)
-library(sna)
-library(network)
 data1<-read.csv("CSV/60_PERIOD1_ATTT.csv")
 data2<-read.csv("CSV/60_PERIOD2_ATT.csv")
 data3<-read.csv("CSV/60_PERIOD3_ATT.csv")
 edges1<-read.csv("CSV/60_PERIOD1_NET.csv", header=TRUE)
 edges2<-read.csv("CSV/60_PERIOD2_NET.csv", header=TRUE)
 edges3<-read.csv("CSV/60_PERIOD3_NET.csv", header=TRUE)
+
+nrow(data1[data1$Marital.Status!=99999,]) # see valid data with marrital status not missing for data 1
+nrow(data2[data2$Marital.Status!=99999,]) # same thing for data 2 
+nrow(data3[data3$Marital.Status!=99999,]) # for data 3
+
+nrow(data1)
+nrow(data2)
+nrow(data3)
 ```
 
 ##Visualizing 
 
 ```{r}
-;
+test<- ergm(edges1~edges)
+summary(test)
 ```
+
+
+## Mixer? 
+```{r}
+require(devtools)
+install_version("mixer", version = "1.9", repos = "http://cran.us.r-project.org")
+
+setSeed(42)
+fblog.sbm <- mixer(as.matrix(get.adjacency(fblog)), 4 + qmin=2, qmax=15)
+
+install.packages("RcppArmadillo")
+library(RcppArmadillo)
+```
+
+## Blockmodel 
+
+# Block Model Version 2
+```{r setup, include=FALSE}
+library(sand)
+library(blockmodels)
+```
+We are going to simulate our own network 
+```{r}
+## generation of one SBM network
+npc <- 30 # nodes per class
+Q <- 3 # classes
+n <- npc * Q # nodes
+Z<-diag(Q)%x%matrix(1,npc,1)
+P<-matrix(runif(Q*Q),Q,Q)
+M<-1*(matrix(runif(n*n),n,n)<Z%*%P%*%t(Z)) ## adjacency matrix
+```
+Let's see what we get back when we run a SBM on this simulated network
+```{r}
+my_model <- BM_bernoulli("SBM",M )
+my_model$estimate()
+which.max(my_model$ICL)
+num.clusters<-3
+my_model$memberships[[num.clusters]]$Z #gives probability of being in each group
+my_model$memberships[[num.clusters]]$plot() #plots the group memberships
+```
+
+# latent model 
+```{r}
+library(eigenmodel)
+lazega.leig.fit1 <- eigenmodel_mcmc(adj.matrix, R=2, S=11000,
+burn=10000)
+```
+
+
+
+
