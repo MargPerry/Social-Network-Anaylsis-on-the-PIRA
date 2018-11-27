@@ -14,6 +14,7 @@ library(sna)
 library(sand)
 library(blockmodels)
 library(sna)
+library(dplyr)
 ```
 
 ##import data 
@@ -88,7 +89,18 @@ num.clusters<-4 #use number from which.max command above
 my_model$memberships[[num.clusters]]$Z#gives probability of being in each group
 test1=my_model$memberships[[num.clusters]]$Z>0.6
 test1
-my_model$memberships[[num.clusters]]$plot() #plots the group memberships
+#typeof(test1)
+
+# Add group variable to dataset "daat1", named "data1.1"
+test2=data.frame(test1)
+data3.1<-data1 %>%
+  mutate(group = "NA")
+test2.1<-test2 %>%
+  mutate(group="NA")
+
+test2.2<-test2.1 %>%
+  mutate(group=ifelse(X1=="TRUE", 1,ifelse(X2=="TRUE",2, ifelse(X3=="TRUE",3,ifelse(X4=="TRUE",4,0)))))
+data1.1=cbind(data1, test2.2[5])
 ```
 We see that there are likely to have four to five groups within the whole dataset. Now we are going to calculate the likelookd for each individual of being in those groups based on some of their specific background information. 
 
