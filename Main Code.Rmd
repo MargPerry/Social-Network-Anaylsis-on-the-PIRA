@@ -17,7 +17,7 @@ library(sna)
 library(dplyr)
 ```
 
-##import data 
+## 1. Data 
 
 ```{r}
 library(sna)
@@ -30,7 +30,7 @@ edges2<-read.csv("CSV/60_PERIOD2_NET.csv", header=TRUE)
 edges3<-read.csv("CSV/60_PERIOD3_NET.csv", header=TRUE)
 ```
 
-## creating adjency matrix for the three dataset 
+## 2. creating adjency matrix for the three dataset 
 
 ```{r}
 # change character form into numarical form:
@@ -45,7 +45,7 @@ class(adj.matrix.3)<-"numeric"
 
 ```
 
-## examing missing data 
+## 3. examing missing data 
 
 Here we can compare the number of missing data with the number of total data
 ```{r}
@@ -58,7 +58,7 @@ nrow(data2)
 nrow(data3)
 ```
 
-##Visualizing 
+## 4. Visualizing 
 
 ```{r}
 gplot(adj.matrix.1,main="Period 1", vertex.col="Blue")
@@ -68,51 +68,103 @@ gplot(adj.matrix.3,main="Period 3", vertex.col = "Orange")
 ```
 
 
-## Blockmodel 
+## 5.1 Method: Bernoulli Blockmodel 
 ```{r}
-my_model<-BM_bernoulli(
-"SBM",
-adj.matrix.1,
+my_model<-function(x){
+  BM_bernoulli("SBM",
+x,
 verbosity=6,
 autosave='',
 plotting=character(0),
 exploration_factor=1.5,
-explore_min=2,
+explore_min=1,
 explore_max=7,
-ncores=detectCores())
+ncores=detectCores())}
 
-my_model$estimate()
+my_model.period1<-my_model(adj.matrix.1)
+#my_model.period2<-my_model(adj.matrix.2)
+my_model.period3<-my_model(adj.matrix.3)
 
-which.max(my_model$ICL)
+estimate_group<-function(x){
+  x$estimate()
+  which.max(x$ICL)
+}
+estimate.period1<-estimate_group(my_model.period1)
+#estimate.period2<-estimate_group(my_model.period2)
+estimate.period3<-estimate_group(my_model.period3)
 
-num.clusters<-4 #use number from which.max command above
-my_model$memberships[[num.clusters]]$Z#gives probability of being in each group
-test1=my_model$memberships[[num.clusters]]$Z>0.6
+
+
+#for period 1:
+my_model.period1$memberships[[estimate.period1]]$Z#gives probability of being in each group
+test1=my_model.period1$memberships[[estimate.period1]]$Z>0.5
 test1
-#typeof(test1)
 
-# Add group variable to dataset "daat1", named "data1.1"
-test2=data.frame(test1)
-data3.1<-data1 %>%
-  mutate(group = "NA")
-test2.1<-test2 %>%
+# for period 3:
+my_model.period3$memberships[[estimate.period3]]$Z#gives probability of being in each group
+test3=my_model.period3$memberships[[estimate.period3]]$Z>0.5
+test3
+#typeof(test1)
+```
+In order to understand how people are connected, we applied the Bernoulli blockmodel to the edge connection among the three time periods.By doing so, we can see the estimate number of groups within each time period has. We will also be able to see the probability each individaul stay in each of those groups. 
+
+By assigning people to the group they have more than 50% chance to be in, we created new matrices-- "test1"" for period 1 and "test3"" for period 3. Those two matrices can tell us whether or not an individual is in certain group. In order to use the group-membership information alone with other variables, we mutated a new column to our original datasets which include information about node characteristics. This new column, called "group", use number to indicate which group each individual belongs to. We can then use this information to understand what makes an individual in one group but not another. 
+
+Note that we tried to run the estimate group function for all three time periods. However, it only works for the first and the third period. We changed the min amd max number of group inside the Bernoulli model and re-examine the adjecency matrxi for period 2, but it still does not work. So in the following part we will just focus on period 1 & 3. 
+
+## 5.2 Method: Add group variable to dataset "daat1", named "data1.2"
+
+```{r}
+#period 1 cleared data
+test1.3=data.frame(test1)
+test1.4<-test1.3 %>%
   mutate(group="NA")
 
-test2.2<-test2.1 %>%
-  mutate(group=ifelse(X1=="TRUE", 1,ifelse(X2=="TRUE",2, ifelse(X3=="TRUE",3,ifelse(X4=="TRUE",4,0)))))
-data1.1=cbind(data1, test2.2[5])
-```
-We see that there are likely to have four to five groups within the whole dataset. Now we are going to calculate the likelookd for each individual of being in those groups based on some of their specific background information. 
+test1.4<-test1.3 %>%
+  mutate(group=ifelse(X1=="TRUE", 1,ifelse(X2=="TRUE",2, ifelse(X3=="TRUE",3,ifelse(X4=="TRUE",4,ifelse(X5=="TRUE", 5, 0))))))
+data1.1=cbind(data1, test1.4[6])
 
-## Multinomial Logistic Regression 
+#check if there are any data without a group 
+#data1.2<-data1.1 %>% filter(group==0)
+
+#period 3 cleared data
+test3.3=data.frame(test3)
+test3.4<-test3.3 %>%
+  mutate(group="NA")
+
+test3.4<-test3.3 %>%
+  mutate(group=ifelse(X1=="TRUE", 1,ifelse(X2=="TRUE",2, ifelse(X3=="TRUE",3,ifelse(X4=="TRUE",4,ifelse(X5=="TRUE", 5, ifelse(X6=="TRUE", 6, ifelse(X7=="TRUE", 7, ifelse(X7=="TRUE", 7, 0)))))))))
+data3.1=cbind(data3, test3.4[8])
+
+
+```
+Based on the Bernoulli Blockmodel, we know that period one has estimately 5 groups, and period 3 has estimately 7 groups. The above code are used to mutate the group-membership information to the original datasets. 
+
+## 5.3 Method: Multinomial Logistic Regression 
+
 ```{r}
-require(foreign)
 require(nnet)
 require(ggplot2)
 require(reshape2)
-data1
-test <- multinom( ~ Gender + Marital.Status, data = data1)
+#install.packages("AER")
+library(AER)
 
+#for period 1:
+test1.1 <- multinom(group ~ Gender + Marital.Status+University, data = data1.1)
+coeftest(test1.1)
+
+#for period 3: 
+test3.1 <- multinom(group ~ Gender + Marital.Status+University, data = data3.1)
+coeftest(test3.1)
 ```
-# Discussion
-We can then run the regression 
+Based on the filtered data, we then ran the multinomial regression model on period 1 and period 3 data. The goal is to understand what variable(s) determain which group a certain belongs to. We choose three major variable: whether or not went to university, marrital status, and gedner. The hypothesis is that people are more likely to be with people with similar background (married ppl are more likely to befriend with married ppl, etc.). 
+
+In period one, we saw that marital status among the five groups does not have statistically significant influence (p-value >0.05 for group 2-4, indicating that marrital status variable does not have significant effect on distinguishing them from group 1). The other two variable, 
+"University" and "Gender", however, has great influence. We can conclude that in period one, gender and education level contribute significantly on who PIRA members befriend with. 
+
+In Period two, we saw a different trend. Marriage status has significant influence on the chance of being assigned into certain for most of the time; only in group 2 this variable does not has a significant p-value. The other two variables work efficiently for all seven groups. Thus we can conclude that in most cases at period 2, PIRA members' friend choices is heavily influenced by their marriage status, gender, and education background. 
+
+# 5.4 Method: ERGM
+
+# 6. Discussion
+We can then run the regression with missing data...
