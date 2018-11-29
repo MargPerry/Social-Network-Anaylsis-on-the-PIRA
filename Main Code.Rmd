@@ -19,7 +19,7 @@ library(dplyr)
 
 ## 1. Data 
 
-```{r}
+```{r, include=FALSE}
 library(sna)
 library(network)
 data1<-read.csv("CSV/60_PERIOD1_ATTT.csv")
@@ -32,7 +32,7 @@ edges3<-read.csv("CSV/60_PERIOD3_NET.csv", header=TRUE)
 
 ## 2. creating adjency matrix for the three dataset 
 
-```{r}
+```{r, include=FALSE}
 # change character form into numarical form:
 adj.matrix.1<-as.matrix(edges1)[,-1] # make sure as many columns as rows
 class(adj.matrix.1)<-"numeric"
@@ -48,7 +48,7 @@ class(adj.matrix.3)<-"numeric"
 ## 3. examing missing data 
 
 Here we can compare the number of missing data with the number of total data
-```{r}
+```{r, include=FALSE}
 nrow(data1[data1$Marital.Status!=99999,]) # see valid data with marrital status not missing for data 1
 nrow(data2[data2$Marital.Status!=99999,]) # same thing for data 2 
 nrow(data3[data3$Marital.Status!=99999,]) # for data 3
@@ -69,10 +69,9 @@ gplot(adj.matrix.3,main="Period 3", vertex.col = "Orange")
 
 
 ## 5.1 Method: Bernoulli Blockmodel 
-```{r}
+```{r, include=FALSE}
 my_model<-function(x){
-  BM_bernoulli("SBM",
-x,
+  BM_bernoulli("SBM",x,
 verbosity=6,
 autosave='',
 plotting=character(0),
@@ -114,7 +113,7 @@ Note that we tried to run the estimate group function for all three time periods
 
 ## 5.2 Method: Add group variable to dataset "daat1", named "data1.2"
 
-```{r}
+```{r,include=FALSE}
 #period 1 cleared data
 test1.3=data.frame(test1)
 test1.4<-test1.3 %>%
@@ -123,6 +122,7 @@ test1.4<-test1.3 %>%
 test1.4<-test1.3 %>%
   mutate(group=ifelse(X1=="TRUE", 1,ifelse(X2=="TRUE",2, ifelse(X3=="TRUE",3,ifelse(X4=="TRUE",4,ifelse(X5=="TRUE", 5, 0))))))
 data1.1=cbind(data1, test1.4[6])
+data1.1
 
 #check if there are any data without a group 
 #data1.2<-data1.1 %>% filter(group==0)
@@ -135,7 +135,7 @@ test3.4<-test3.3 %>%
 test3.4<-test3.3 %>%
   mutate(group=ifelse(X1=="TRUE", 1,ifelse(X2=="TRUE",2, ifelse(X3=="TRUE",3,ifelse(X4=="TRUE",4,ifelse(X5=="TRUE", 5, ifelse(X6=="TRUE", 6, ifelse(X7=="TRUE", 7, ifelse(X7=="TRUE", 7, 0)))))))))
 data3.1=cbind(data3, test3.4[8])
-
+data3.1
 
 ```
 Based on the Bernoulli Blockmodel, we know that period one has estimately 5 groups, and period 3 has estimately 7 groups. The above code are used to mutate the group-membership information to the original datasets. 
