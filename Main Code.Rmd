@@ -3,6 +3,8 @@ title: "Main Code"
 author: "Margaret Perry"
 date: "November 18, 2018"
 output: pdf_document
+editor_options: 
+  chunk_output_type: inline
 ---
 
 ```{r setup, include=FALSE}
@@ -10,8 +12,17 @@ library(readr)
 library(igraph)
 library(sna)
 library(sand)
+<<<<<<< HEAD
 library(ergm)
 ```
+=======
+library(blockmodels)
+library(sna)
+library(dplyr)
+```
+
+##import data 
+>>>>>>> 7e97b91ed8014f6ae312514adb873e2db8efe855
 
 #Period 1
 ##import data
@@ -27,7 +38,8 @@ edges2<-read.csv("CSV/60_PERIOD2_NET.csv", header=TRUE)
 edges3<-read.csv("CSV/60_PERIOD3_NET.csv", header=TRUE)
 ```
 
-#creating adjency matrix for the three dataset 
+## creating adjency matrix for the three dataset 
+
 ```{r}
 # change character form into numarical form:
 adj.matrix.1<-as.matrix(edges1)[,-1] # make sure as many columns as rows
@@ -41,7 +53,8 @@ class(adj.matrix.3)<-"numeric"
 
 ```
 
-# examing missing data 
+## examing missing data 
+
 Here we can compare the number of missing data with the number of total data
 ```{r}
 nrow(data1[data1$Marital.Status!=99999,]) # see valid data with marrital status not missing for data 1
@@ -56,61 +69,75 @@ nrow(data3)
 ##Visualizing 
 
 ```{r}
+<<<<<<< HEAD
 test<- ergm(edges1~edges)
 summary(test)
 ```
+
+=======
+gplot(adj.matrix.1,main="Period 1", vertex.col="Blue")
+gplot(adj.matrix.2,main="Period 2", vertex.col="Purple")
+gplot(adj.matrix.3,main="Period 3", vertex.col = "Orange")
+
+```
+>>>>>>> 7e97b91ed8014f6ae312514adb873e2db8efe855
 
 
 ## Blockmodel 
 
 ```{r}
-adj.matrix<-as.matrix(edges3)[,-1] # make sure as many columns as rows
-
-adj.matrix.n<-adj.matrix
-
-class(adj.matrix.n)<-"numeric"
-
-library(sna)
-gplot(adj.matrix.n)
-
 my_model<-BM_bernoulli(
 "SBM",
-adj.matrix.n,
+adj.matrix.1,
 verbosity=6,
 autosave='',
 plotting=character(0),
 exploration_factor=1.5,
-explore_min=4,
-explore_max=Inf,
+explore_min=2,
+explore_max=7,
 ncores=detectCores())
 
-#my_model <- BM_bernoulli_multiplex("SBM",list(adj.matrix), plotting='', explore_min=2, explore_max=2, ncores=2, verbosity=0)
 my_model$estimate()
 
 which.max(my_model$ICL)
 
-num.clusters<-3 #use number from which.max command above
-my_model$memberships[[num.clusters]]$Z #gives probability of being in each group
-my_model$memberships[[num.clusters]]$plot() #plots the group memberships
+num.clusters<-4 #use number from which.max command above
+my_model$memberships[[num.clusters]]$Z#gives probability of being in each group
+test1=my_model$memberships[[num.clusters]]$Z>0.6
+test1
+#typeof(test1)
 
+# Add group variable to dataset "daat1", named "data1.1"
+test2=data.frame(test1)
+data3.1<-data1 %>%
+  mutate(group = "NA")
+test2.1<-test2 %>%
+  mutate(group="NA")
 
-
+test2.2<-test2.1 %>%
+  mutate(group=ifelse(X1=="TRUE", 1,ifelse(X2=="TRUE",2, ifelse(X3=="TRUE",3,ifelse(X4=="TRUE",4,0)))))
+data1.1=cbind(data1, test2.2[5])
 ```
+We see that there are likely to have four to five groups within the whole dataset. Now we are going to calculate the likelookd for each individual of being in those groups based on some of their specific background information. 
 
+<<<<<<< HEAD
 
 # Block Model Version 2
 
 We are going to simulate our own network 
+=======
+## Multinomial Logistic Regression 
+>>>>>>> 7e97b91ed8014f6ae312514adb873e2db8efe855
 ```{r}
-## generation of one SBM network
-npc <- 30 # nodes per class
-Q <- 3 # classes
-n <- npc * Q # nodes
-Z<-diag(Q)%x%matrix(1,npc,1) #??
-P<-matrix(runif(Q*Q),Q,Q) # matrix for classes 
-M<-1*(matrix(runif(n*n),n,n)<Z%*%P%*%t(Z)) ## adjacency matrix; t is transpose of matrix Z
+require(foreign)
+require(nnet)
+require(ggplot2)
+require(reshape2)
+data1
+test <- multinom( ~ Gender + Marital.Status, data = data1)
 
 ```
+<<<<<<< HEAD
 Let's see what we get back when we run a SBM on this simulated network
 ```{r}
 my_model <- BM_bernoulli("SBM", M)
@@ -131,3 +158,7 @@ burn=10000)
 
 
 
+=======
+# Discussion
+We can then run the regression 
+>>>>>>> 7e97b91ed8014f6ae312514adb873e2db8efe855
