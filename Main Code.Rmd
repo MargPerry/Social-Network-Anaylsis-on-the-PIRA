@@ -12,16 +12,32 @@ library(readr)
 library(igraph)
 library(sna)
 library(sand)
+<<<<<<< HEAD
+library(ergm)
+```
+=======
 library(blockmodels)
 library(sna)
 library(dplyr)
 ```
 
+<<<<<<< HEAD
+##import data 
+>>>>>>> 7e97b91ed8014f6ae312514adb873e2db8efe855
+
+#Period 1
+##import data
+```{r}
+
+##import data 
+library(igraph)
+=======
 ## 1. Data 
 
 ```{r, include=FALSE}
 library(sna)
 library(network)
+>>>>>>> 4474a6e7c405a45fd1173b259669f7b13e9a935a
 data1<-read.csv("CSV/60_PERIOD1_ATTT.csv")
 data2<-read.csv("CSV/60_PERIOD2_ATT.csv")
 data3<-read.csv("CSV/60_PERIOD3_ATT.csv")
@@ -61,17 +77,33 @@ nrow(data3)
 ## 4. Visualizing 
 
 ```{r}
+<<<<<<< HEAD
+test<- ergm(edges1~edges)
+summary(test)
+```
+
+=======
 gplot(adj.matrix.1,main="Period 1", vertex.col="Blue")
 gplot(adj.matrix.2,main="Period 2", vertex.col="Purple")
 gplot(adj.matrix.3,main="Period 3", vertex.col = "Orange")
 
 ```
+>>>>>>> 7e97b91ed8014f6ae312514adb873e2db8efe855
 
 
+<<<<<<< HEAD
+## Blockmodel 
+
+```{r}
+my_model<-BM_bernoulli(
+"SBM",
+adj.matrix.1,
+=======
 ## 5.1 Method: Bernoulli Blockmodel 
 ```{r, include=FALSE}
 my_model<-function(x){
   BM_bernoulli("SBM",x,
+>>>>>>> 4474a6e7c405a45fd1173b259669f7b13e9a935a
 verbosity=6,
 autosave='',
 plotting=character(0),
@@ -142,6 +174,17 @@ Based on the Bernoulli Blockmodel, we know that period one has estimately 5 grou
 
 ## 5.3 Method: Multinomial Logistic Regression 
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+
+# Block Model Version 2
+
+We are going to simulate our own network 
+=======
+## Multinomial Logistic Regression 
+>>>>>>> 7e97b91ed8014f6ae312514adb873e2db8efe855
+=======
+>>>>>>> 4474a6e7c405a45fd1173b259669f7b13e9a935a
 ```{r}
 require(nnet)
 require(ggplot2)
@@ -157,6 +200,33 @@ coeftest(test1.1)
 test3.1 <- multinom(group ~ Gender + Marital.Status+University, data = data3.1)
 coeftest(test3.1)
 ```
+<<<<<<< HEAD
+<<<<<<< HEAD
+Let's see what we get back when we run a SBM on this simulated network
+```{r}
+my_model <- BM_bernoulli("SBM", M)
+my_model$estimate()
+which.max(my_model$ICL)
+num.clusters<-3
+my_model$memberships[[num.clusters]]$Z #gives probability of being in each group
+my_model$memberships[[num.clusters]]$plot() #plots the group memberships
+```
+
+# latent model 
+```{r}
+library(eigenmodel)
+lazega.leig.fit1 <- eigenmodel_mcmc(adj.matrix, R=2, S=11000,
+burn=10000)
+```
+
+
+
+
+=======
+# Discussion
+We can then run the regression 
+>>>>>>> 7e97b91ed8014f6ae312514adb873e2db8efe855
+=======
 Based on the filtered data, we then ran the multinomial regression model on period 1 and period 3 data. The goal is to understand what variable(s) determain which group a certain belongs to. We choose three major variable: whether or not went to university, marrital status, and gedner. The hypothesis is that people are more likely to be with people with similar background (married ppl are more likely to befriend with married ppl, etc.). 
 
 In period one, we saw that marital status among the five groups does not have statistically significant influence (p-value >0.05 for group 2-4, indicating that marrital status variable does not have significant effect on distinguishing them from group 1). The other two variable, 
@@ -168,3 +238,4 @@ In Period two, we saw a different trend. Marriage status has significant influen
 
 # 6. Discussion
 We can then run the regression with missing data...
+>>>>>>> 4474a6e7c405a45fd1173b259669f7b13e9a935a
