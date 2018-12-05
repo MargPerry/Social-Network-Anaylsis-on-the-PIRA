@@ -1,0 +1,235 @@
+---
+title: "Project draft"
+author: Margaret Perry, Stella Li, Yuqing Geng
+date: "11/28/2018"
+output: pdf_document
+---
+# Introduction:
+In the past few decades, with the rapid development of social network, governments around the world have adopted it for anti-terrorism and anti-insurgency purposes. The recent Brexit has brought back people’s attention to the longstanding issue between northern Ireland and Britain. After decades of conflicts and numerous casualties, many people are still haunted by the aftereffect. We are interested in using the ERGM and Bernoulli Block Model to map out the the ties between members of PIRA, and evaluate what variables contribute to the group-membership within the network based on multivariable logistic regression. We mainly focus on marital status, but for further analysis, we would also take other variables like gender, whether attend university into consideration. 
+
+# Data: 
+## 4. Visualizing 
+
+The data that we are using for this experiment was found in the datasets area of the UCINET Software site. According to the site the data was collected by the  International Center for the Study of Terrorism, Pennsylvania State University. The ties are composed of 4 types of relationships involvement in a PIRA activity together, friends before joining PIRA movement, blood relatives, and  related through marriage. According to the data description the network have “binary and symmetric relations between members”. The data covers of the members of the Provisional Irish Republican Army from 1970 to 1998, which the height of the troubles back in Ireland and England. For the members data was collected on information regarding gender, age, marital status, recruiting age, whether or not they attended university, then role and task-related characteristics, lastly brigade membership which is in reference to the cell that the belonged to. The observations are divided in 6 different time periods across the 28 years. However the period 4 and 5 datasets are combined on the website and there is no clear way to distinguish them, but we will not be using this subset in our analysis so it is not our main concern.
+
+```{r, echo=FALSE, results='hide'}
+library(readr)
+library(igraph)
+library(sna)
+library(ergm)
+library(sand)
+library(blockmodels)
+library(dplyr)
+library(tidyr)
+library(sna)
+library(network)
+data1<-read.csv("CSV/60_PERIOD1_ATTT.csv",na = "99999")
+data2<-read.csv("CSV/60_PERIOD2_ATT.csv",na = "99999")
+data3<-read.csv("CSV/60_PERIOD3_ATT.csv",na = "99999")
+data6<-read.csv("CSV/60_PERIOD6_ATT.csv",na = "99999")
+edges1<-read.csv("CSV/60_PERIOD1_NET.csv", header=TRUE)
+edges2<-read.csv("CSV/60_PERIOD2_NET.csv", header=TRUE)
+edges3<-read.csv("CSV/60_PERIOD3_NET.csv", header=TRUE)
+edges6<-read.csv("CSV/60_PERIOD6_NET.csv", header=TRUE)
+
+nrow(data1[data1$Marital.Status!=99999,]) # see valid data with marrital status not missing for data 1
+nrow(data2[data2$Marital.Status!=99999,]) # same thing for data 2 
+nrow(data3[data3$Marital.Status!=99999,]) # for data 3
+nrow(data6[data6$Marital.Status!=99999,])
+
+
+nrow(data1)
+nrow(data2)
+nrow(data3)
+
+# creating adjency matrix for the three dataset 
+# change character form into numarical form:
+adj.matrix.1<-as.matrix(edges1)[,-1] # make sure as many columns as rows
+class(adj.matrix.1)<-"numeric"
+adj.matrix.2<-as.matrix(edges2)[,-1] # make sure as many columns as rows
+class(adj.matrix.2)<-"numeric"
+adj.matrix.3<-as.matrix(edges3)[,-1] # make sure as many columns as rows
+class(adj.matrix.3)<-"numeric"
+adj.matrix.6<-as.matrix(edges6)[,-1] # make sure as many columns as rows
+class(adj.matrix.6)<-"numeric"
+
+#Drop nas
+data_1= data1%>%
+  drop_na()
+
+data_1ma= data1%>%
+  drop_na("Marital.Status")
+
+data_2= data2%>%
+  drop_na()
+
+data_2ma= data2%>%
+  drop_na("Marital.Status")
+
+data_3= data3%>%
+  drop_na()
+
+data_3ma= data3%>%
+  drop_na("Marital.Status")
+
+
+data_6= data6%>%
+  drop_na()
+  
+data_6ma= data6%>%
+  drop_na("Marital.Status")
+```
+
+
+#Method
+
+```{r, results='hide' }
+# creating networks
+net_1ma= network(adj.matrix.1, vertex.attr = data_1ma[,-1], vertex.attrnames = colnames(data1[,-1]), directed=F, hyper=F, loops=F, multiple=F, bipartite=F)
+
+net_2ma= network(adj.matrix.2, vertex.attr = data_2ma[,-1], vertex.attrnames = colnames(data2[,-1]), directed=F, hyper=F, loops=F, multiple=F, bipartite=F)
+
+
+net3= network(adj.matrix.3, vertex.attr = data3[,-1], vertex.attrnames = colnames(data3[,-1]), directed=F, hyper=F, loops=F, multiple=F, bipartite=F)
+
+
+net_6= network(adj.matrix.6, vertex.attr = data_6[,-1], vertex.attrnames = colnames(data6[,-1]), directed=F, hyper=F, loops=F, multiple=F, bipartite=F)
+net_6
+
+net_3= network(adj.matrix.3, vertex.attr = data_3[,-1], vertex.attrnames = colnames(data_3[,-1]), directed=F, hyper=F, loops=F, multiple=F, bipartite=F)
+net_3
+
+net_6ma= network(adj.matrix.6, vertex.attr = data_6ma[,-1], vertex.attrnames = colnames(data6[,-1]), directed=F, hyper=F, loops=F, multiple=F, bipartite=F)
+net_6
+
+net_3ma= network(adj.matrix.3, vertex.attr = data_3ma[,-1], vertex.attrnames = colnames(data_3ma[,-1]), directed=F, hyper=F, loops=F, multiple=F, bipartite=F)
+net_3
+```
+
+#Results and Visualization
+```{r, echo=FALSE}
+gplot(adj.matrix.1,main="Period 1", vertex.col="Blue", usearrows = FALSE)
+gplot(adj.matrix.2,main="Period 2", vertex.col="Purple", usearrow= FALSE)
+gplot(adj.matrix.3,main="Period 3", vertex.col = "Orange", edge.col= "blue",usearrows = FALSE)
+gplot(adj.matrix.6,main="Period 6", vertex.col = "Orange", edge.col= "blue", usearrows = FALSE)
+```
+# Bernoulli Block Model
+```{r, results='hide'}
+my_model<-function(x){
+  BM_bernoulli("SBM",x,
+verbosity=6,
+autosave='',
+plotting=character(0),
+exploration_factor=1.5,
+explore_min=1,
+explore_max=7,
+ncores=detectCores())}
+
+my_model.period1<-my_model(adj.matrix.1)
+#my_model.period2<-my_model(adj.matrix.2)
+my_model.period3<-my_model(adj.matrix.3)
+
+estimate_group<-function(x){
+  x$estimate()
+  which.max(x$ICL)
+}
+estimate.period1<-estimate_group(my_model.period1)
+#estimate.period2<-estimate_group(my_model.period2)
+estimate.period3<-estimate_group(my_model.period3)
+
+
+#for period 1:
+my_model.period1$memberships[[estimate.period1]]$Z#gives probability of being in each group
+test1=my_model.period1$memberships[[estimate.period1]]$Z>0.5
+test1
+
+# for period 3:
+my_model.period3$memberships[[estimate.period3]]$Z#gives probability of being in each group
+test3=my_model.period3$memberships[[estimate.period3]]$Z>0.5
+test3
+```
+
+In order to understand how people are connected, we applied the Bernoulli blockmodel to the edge connection among the three time periods.By doing so, we can see the estimate number of groups within each time period has. We will also be able to see the probability each individual belong to each of these groups. 
+
+By assigning people to the group they have more than 50% chance to be in, we created new matrices-- "test1"" for period 1 and "test3"" for period 3. Those two matrices can tell us whether or not an individual is in certain group. In order to use the group-membership information alone with other variables, we mutated a new column to our original datasets which include information about node characteristics. This new column, called "group", use number to indicate which group each individual belongs to. We can then use this information to understand what makes an individual in one group but not another. 
+
+Note that we tried to run the estimate group function for all three time periods. However, it only works for the first and the third period. We changed the min and max number of group inside the Bernoulli model and re-examine the adjacency matrix for period 2, but it still does not work. So in the following part we will just focus on period 1 and 3. 
+
+
+```{r,echo=FALSE, results='hide'}
+# Adding group variable to dataset "data1", named "data1.2"
+#period 1 cleared data
+test1.3=data.frame(test1)
+test1.4<-test1.3 %>%
+  mutate(group="NA")
+
+test1.4<-test1.3 %>%
+  mutate(group=ifelse(X1=="TRUE", 1,ifelse(X2=="TRUE",2, ifelse(X3=="TRUE",3,ifelse(X4=="TRUE",4,ifelse(X5=="TRUE", 5, 0))))))
+data1.1=cbind(data1, test1.4[6])
+data1.1
+
+#check if there are any data without a group 
+#data1.2<-data1.1 %>% filter(group==0)
+
+#period 3 cleared data
+test3.3=data.frame(test3)
+test3.4<-test3.3 %>%
+  mutate(group="NA")
+
+test3.4<-test3.3 %>%
+  mutate(group=ifelse(X1=="TRUE", 1,ifelse(X2=="TRUE",2, ifelse(X3=="TRUE",3,ifelse(X4=="TRUE",4,ifelse(X5=="TRUE", 5, ifelse(X6=="TRUE", 6, ifelse(X7=="TRUE", 7, ifelse(X7=="TRUE", 7, 0)))))))))
+data3.1=cbind(data3, test3.4[8])
+
+```
+Based on the Bernoulli Blockmodel, we know that period one has estimately 5 groups, and period 3 has estimately 7 groups. The above code are used to mutate the group-membership information to the original datasets. 
+
+#Multinomial Logistic Regression 
+```{r, echo=FALSE}
+require(nnet)
+require(ggplot2)
+require(reshape2)
+library(AER)
+
+#for period 1:
+test1.1 <- multinom(group ~ Gender + Marital.Status+University, data = data1.1)
+coeftest(test1.1)
+
+#for period 3: 
+test3.1 <- multinom(group ~ Gender + Marital.Status+University, data = data3.1)
+coeftest(test3.1)
+```
+Based on the filtered data, we then ran the multinomial regression model on period 1 and period 3 data. The goal is to understand what variable(s) determine which group a certain belongs to. We choose three major variable: whether or not went to university, marital status, and gender. The hypothesis is that people are more likely to be with people with similar background (married ppl are more likely to befriend with married ppl, etc.). 
+
+In period one, we saw that marital status among the five groups does not have statistically significant influence (p-value >0.05 for group 2-4, indicating that marital status variable does not have significant effect on distinguishing them from group 1). The other two variable, 
+"University" and "Gender", however, has great influence. We can conclude that in period one, gender and education level contribute significantly on who PIRA members befriend with. 
+
+In Period two, we saw a different trend. Marriage status has significant influence on the chance of being assigned into certain for most of the time; only in group 2 this variable does not has a significant p-value. The other two variables work efficiently for all seven groups. Thus we can conclude that in most cases at period 2, PIRA members' friend choices is heavily influenced by their marriage status, gender, and education background. 
+
+# ERGM Model
+```{r}
+#Period 1:
+MaritalStatus_1=ergm(net_1ma~edges+nodematch("Marital.Status"))
+summary(MaritalStatus_1)
+
+#Period 1:
+MaritalStatus_2=ergm(net_2ma~edges+nodematch("Marital.Status"))
+summary(MaritalStatus_2)
+
+#Period 3
+MaritalStatus_3=ergm(net_3ma~edges+nodematch("Marital.Status"))
+summary(MaritalStatus_3)
+
+#Period 6
+MaritalStatus_6=ergm(net_6ma~edges+nodematch("Marital.Status"))
+summary(MaritalStatus_6)
+```
+
+For all three periods when node matching on marital status we see that we obtain a p-value of 0.0266, which is statistically significant.  Meaning that there is a tendency within the network for members of the PIRA with similar marital status have some form of relationship  to each other. This is interesting because it is an under considered version of homophily in that we are often most concerned with the criminal actives of such organizations that there may be very mundane ways to analyze the network. Knowing this it may be worth looking to how marital status relates to the other nodal characteristics. If we had access to the information it could be avantages to look at the types of relationship best described by marital status save for related for marriage, which would give us a valuable perspective of the inner workings of the network. (This is sort of discussion but I’m not sure how to dive it up). 
+
+
+# Discussion:
+Ethics: Due to the data having already been collected and published the ethical concerns of the data have hypothetically been addressed. However little is available on how this data was collected, and so we are unsure when in relation to the network the data was collected and the status of the individuals. There is a lot of concern with the vaility and the ethics of collecting data from prisoners, this may have been the case of these individuals. It could have been collected retroactively from events and individuals, but this is likely not the case. When data is collected from inmates it is unlike that the information is truly voluntary. They may also be concerned with confidentiality and refuse to disclose some, more sensitive, information about relatives or significant others in hopes of keeping them safe.
+
+We have some missing data in all of our data sets, due to lack of information, we do not know whether our data is missing at random or not, but we would like to see in the further analysis, whether there will be more data added in or changed, meaning new relationship being formed or old relationship being changed.
+
+
