@@ -208,20 +208,24 @@ In Period two, we saw a different trend. Marriage status has significant influen
 # ERGM Model
 ```{r}
 #Period 1:
-MaritalStatus_1=ergm(net_1ma~edges+nodematch("Marital.Status"))
+MaritalStatus_1=ergm(net_1~edges+nodematch("Marital.Status"))
 summary(MaritalStatus_1)
+plot(net_1, vertex.col=c("pink","blue")[(get.vertex.attribute(net_1, "Marital.Status"))])
 
-#Period 1:
-MaritalStatus_2=ergm(net_2ma~edges+nodematch("Marital.Status"))
+#Period 2:
+MaritalStatus_2=ergm(net_2~edges+nodematch("Marital.Status"))
 summary(MaritalStatus_2)
+plot(net_3, vertex.col=c("pink","blue")[(get.vertex.attribute(net_3, "Marital.Status"))])
 
 #Period 3
-MaritalStatus_3=ergm(net_3ma~edges+nodematch("Marital.Status"))
+MaritalStatus_3=ergm(net_3~edges+nodematch("Marital.Status"))
 summary(MaritalStatus_3)
+plot(net_3, vertex.col=c("pink","blue")[(get.vertex.attribute(net_3, "Marital.Status"))])
 
 #Period 6
-MaritalStatus_6=ergm(net_6ma~edges+nodematch("Marital.Status"))
+MaritalStatus_6=ergm(net_6~edges+nodematch("Marital.Status"))
 summary(MaritalStatus_6)
+plot(net_6, vertex.col=c("pink","blue")[(get.vertex.attribute(net_6, "Marital.Status"))])
 ```
 
 For all three periods when node matching on marital status we see that we obtain a p-value of 0.0266, which is statistically significant.  Meaning that there is a tendency within the network for members of the PIRA with similar marital status have some form of relationship  to each other. This is interesting because it is an under considered version of homophily in that we are often most concerned with the criminal actives of such organizations that there may be very mundane ways to analyze the network. Knowing this it may be worth looking to how marital status relates to the other nodal characteristics. If we had access to the information it could be avantages to look at the types of relationship best described by marital status save for related for marriage, which would give us a valuable perspective of the inner workings of the network. (This is sort of discussion but I’m not sure how to dive it up). 
