@@ -11,7 +11,7 @@ In the past few decades, with the rapid development of social network, governmen
 
 * Based on the interpersonal connection we have, how many friendship groups are there among PIRA members? 
 
-* What contribute to the formation of friendship grouos? And has it changed overtime? 
+* What contribute to the formation of friendship groups? And has it changed overtime? 
 
 We are interested in maping out the the ties between members of PIRA (Provisional Irish Republican Army), estimate how many social groups exist among those PIRA member, and evaluate what node characteristics contribute to the group-membership. In the first pary, we are going to use ERGM node-matching technique to detact common background on PIRA membership; for the second part, we are going to use Bernuilli Block Model to detect how many friendship groups exist among the PIRA members, and what variables contribute to the formation of those memberships. 
 
