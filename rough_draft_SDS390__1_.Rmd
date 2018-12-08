@@ -5,10 +5,18 @@ date: "11/28/2018"
 output: pdf_document
 ---
 # Introduction:
-In the past few decades, with the rapid development of social network, governments around the world have adopted it for anti-terrorism and anti-insurgency purposes. The recent Brexit has brought back people’s attention to the longstanding issue between northern Ireland and Britain. After decades of conflicts and numerous casualties, many people are still haunted by the aftereffect. We are interested in using the ERGM and Bernoulli Block Model to map out the the ties between members of PIRA, and evaluate what variables contribute to the group-membership within the network based on multivariable logistic regression. We mainly focus on marital status, but for further analysis, we would also take other variables like gender, whether attend university into consideration. 
+In the past few decades, with the rapid development of social network, governments around the world have adopted it for anti-terrorism and anti-insurgency purposes. Today we are going to use social network to detect friendship among terriorists in Ireland, who are commonly called PIRA (Provisional Irish Republican Army). Under the Brexit background, people's attention has been brought back to the longstanding issue between northern Ireland and Britain.Thus this study will help us under the following questions: 
+
+* What are some common background information among PIRA members? 
+
+* Based on the interpersonal connection we have, how many friendship groups are there among PIRA members? 
+
+* What contribute to the formation of friendship grouos? And has it changed overtime? 
+
+We are interested in maping out the the ties between members of PIRA (Provisional Irish Republican Army), estimate how many social groups exist among those PIRA member, and evaluate what node characteristics contribute to the group-membership. In the first pary, we are going to use ERGM node-matching technique to detact common background on PIRA membership; for the second part, we are going to use Bernuilli Block Model to detect how many friendship groups exist among the PIRA members, and what variables contribute to the formation of those memberships. 
 
 # Data: 
-## 4. Visualizing 
+## 1. Visualizing 
 
 The data that we are using for this experiment was found in the datasets area of the UCINET Software site. According to the site the data was collected by the  International Center for the Study of Terrorism, Pennsylvania State University. The ties are composed of 4 types of relationships involvement in a PIRA activity together, friends before joining PIRA movement, blood relatives, and  related through marriage. According to the data description the network have “binary and symmetric relations between members”. The data covers of the members of the Provisional Irish Republican Army from 1970 to 1998, which the height of the troubles back in Ireland and England. For the members data was collected on information regarding gender, age, marital status, recruiting age, whether or not they attended university, then role and task-related characteristics, lastly brigade membership which is in reference to the cell that the belonged to. The observations are divided in 6 different time periods across the 28 years. However the period 4 and 5 datasets are combined on the website and there is no clear way to distinguish them, but we will not be using this subset in our analysis so it is not our main concern.
 
@@ -183,7 +191,7 @@ data3.1=cbind(data3, test3.4[8])
 ```
 Based on the Bernoulli Blockmodel, we know that period one has estimately 5 groups, and period 3 has estimately 7 groups. The above code are used to mutate the group-membership information to the original datasets. 
 
-#Multinomial Logistic Regression 
+#Multinomial Logistic Regression --assume independent observation --plot 
 ```{r, echo=FALSE}
 require(nnet)
 require(ggplot2)
@@ -237,4 +245,5 @@ Ethics: Due to the data having already been collected and published the ethical 
 
 We have some missing data in all of our data sets, due to lack of information, we do not know whether our data is missing at random or not, but we would like to see in the further analysis, whether there will be more data added in or changed, meaning new relationship being formed or old relationship being changed.
 
+# Bibliography  
 
