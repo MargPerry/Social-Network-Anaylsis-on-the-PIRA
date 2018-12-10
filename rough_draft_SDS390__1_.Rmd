@@ -93,9 +93,9 @@ data_6ma= data6%>%
 
 ```{r, results='hide' }
 # creating networks
-net_1ma= network(adj.matrix.1, vertex.attr = data_1ma[,-1], vertex.attrnames = colnames(data1[,-1]), directed=F, hyper=F, loops=F, multiple=F, bipartite=F)
+net_1= network(adj.matrix.1, vertex.attr = data_1ma[,-1], vertex.attrnames = colnames(data1[,-1]), directed=F, hyper=F, loops=F, multiple=F, bipartite=F)
 
-net_2ma= network(adj.matrix.2, vertex.attr = data_2ma[,-1], vertex.attrnames = colnames(data2[,-1]), directed=F, hyper=F, loops=F, multiple=F, bipartite=F)
+net_2= network(adj.matrix.2, vertex.attr = data_2ma[,-1], vertex.attrnames = colnames(data2[,-1]), directed=F, hyper=F, loops=F, multiple=F, bipartite=F)
 
 
 net3= network(adj.matrix.3, vertex.attr = data3[,-1], vertex.attrnames = colnames(data3[,-1]), directed=F, hyper=F, loops=F, multiple=F, bipartite=F)
@@ -188,6 +188,17 @@ test3.4<-test3.3 %>%
   mutate(group=ifelse(X1=="TRUE", 1,ifelse(X2=="TRUE",2, ifelse(X3=="TRUE",3,ifelse(X4=="TRUE",4,ifelse(X5=="TRUE", 5, ifelse(X6=="TRUE", 6, ifelse(X7=="TRUE", 7, ifelse(X7=="TRUE", 7, 0)))))))))
 data3.1=cbind(data3, test3.4[8])
 
+data1.1$group<-  as.character(data1.1$group)
+
+library(igraph)
+library(ergm)
+group_net1<-network(adj.matrix.1, vertex.attr=data1.1[,-1], vertex.attrnames=colnames(data1.1[,-1]),
+                directed=F, hyper=F, loops=F, multiple=F, bipartite=F)
+
+
+plot(group_net1, vertex.color=c("green","pink","red","blue","yellow")[(get.vertex.attribute(group_net1, "group"))])
+
+
 ```
 Based on the Bernoulli Blockmodel, we know that period one has estimately 5 groups, and period 3 has estimately 7 groups. The above code are used to mutate the group-membership information to the original datasets. 
 
@@ -205,11 +216,22 @@ coeftest(test1.1)
 #for period 3: 
 test3.1 <- multinom(group ~ Gender + Marital.Status+University, data = data3.1)
 coeftest(test3.1)
+
+install.packages("plotly")
+library(plotly)
+#visualization
+plotly(data1.1, x = ~Gender, y = ~Marital.Status, z = ~test1.1, type = "scatter3d", 
+        mode = "markers", marker = list(size = 2)) %>%
+  add_surface(x = xgrid, y = zgrid, z = p) %>%
+  layout(title = "Multivariable model",
+         scene = list(
+           xaxis = list(title = "x"), 
+           yaxis = list(title = "z"), 
+           zaxis = list(title = "probability")))
 ```
 Based on the filtered data, we then ran the multinomial regression model on period 1 and period 3 data. The goal is to understand what variable(s) determine which group a certain belongs to. We choose three major variable: whether or not went to university, marital status, and gender. The hypothesis is that people are more likely to be with people with similar background (married ppl are more likely to befriend with married ppl, etc.). 
 
-In period one, we saw that marital status among the five groups does not have statistically significant influence (p-value >0.05 for group 2-4, indicating that marital status variable does not have significant effect on distinguishing them from group 1). The other two variable, 
-"University" and "Gender", however, has great influence. We can conclude that in period one, gender and education level contribute significantly on who PIRA members befriend with. 
+In period one, we saw that marital status among the five groups does not have statistically significant distinguish the probability to belong to group1 comparing to belonging to any other groups (p-value >0.05 for group 2-4, indicating that marital status variable does not have significant effect on distinguishing them from group 1). The other two variable, "University" and "Gender", however, has great influence. We can conclude that in period one, gender and education level contribute significantly on who PIRA members befriend with. 
 
 In Period two, we saw a different trend. Marriage status has significant influence on the chance of being assigned into certain for most of the time; only in group 2 this variable does not has a significant p-value. The other two variables work efficiently for all seven groups. Thus we can conclude that in most cases at period 2, PIRA members' friend choices is heavily influenced by their marriage status, gender, and education background. 
 
@@ -245,4 +267,8 @@ Ethics: Due to the data having already been collected and published the ethical 
 We have some missing data in all of our data sets, due to lack of information, we do not know whether our data is missing at random or not, but we would like to see in the further analysis, whether there will be more data added in or changed, meaning new relationship being formed or old relationship being changed.
 
 # Bibliography  
+
+“Lethal Connections: The Determinants of Network Connections in the Provisional Irish Republican Army, 1970–1998.” Taylor and Francis Online, www.tandfonline.com/doi/full/10.1080/03050629.2013.863190.
+
+https://sites.google.com/site/ucinetsoftware/datasets/covert-networks/provisionalirishrepublicanarmy (dataset)
 
