@@ -21,7 +21,13 @@ library(sand)
 library(blockmodels)
 library(dplyr)
 library(tidyr)
+library(ggplot2)
+library(GGally)
 library(sna)
+library(threejs)
+library(networkD3)
+library(ndtv)
+library(visNetwork)
 library(network)
 data1<-read.csv("CSV/60_PERIOD1_ATTT.csv",na = "99999")
 data2<-read.csv("CSV/60_PERIOD2_ATT.csv",na = "99999")
@@ -57,6 +63,7 @@ class(adj.matrix.6)<-"numeric"
 data_1= data1%>%
   drop_na()
 
+
 data_1ma= data1%>%
   drop_na("Marital.Status")
 
@@ -85,9 +92,9 @@ data_6ma= data6%>%
 
 ```{r, results='hide' }
 # creating networks
-net_1ma= network(adj.matrix.1, vertex.attr = data_1ma[,-1], vertex.attrnames = colnames(data1[,-1]), directed=F, hyper=F, loops=F, multiple=F, bipartite=F)
+net_1= network(adj.matrix.1, vertex.attr = data_1ma[,-1], vertex.attrnames = colnames(data1[,-1]), directed=F, hyper=F, loops=F, multiple=F, bipartite=F)
 
-net_2ma= network(adj.matrix.2, vertex.attr = data_2ma[,-1], vertex.attrnames = colnames(data2[,-1]), directed=F, hyper=F, loops=F, multiple=F, bipartite=F)
+net_2= network(adj.matrix.2, vertex.attr = data_2ma[,-1], vertex.attrnames = colnames(data2[,-1]), directed=F, hyper=F, loops=F, multiple=F, bipartite=F)
 
 
 net3= network(adj.matrix.3, vertex.attr = data3[,-1], vertex.attrnames = colnames(data3[,-1]), directed=F, hyper=F, loops=F, multiple=F, bipartite=F)
@@ -109,7 +116,7 @@ net_3
 #Results and Visualization
 ```{r, echo=FALSE}
 gplot(adj.matrix.1,main="Period 1", vertex.col="Blue", usearrows = FALSE)
-gplot(adj.matrix.2,main="Period 2", vertex.col="Purple", usearrow= FALSE)
+gplot(adj.matrix.2,main="Period 2", vertex.col="yellow", edge.col = "blue", usearrow= FALSE)
 gplot(adj.matrix.3,main="Period 3", vertex.col = "Orange", edge.col= "blue",usearrows = FALSE)
 gplot(adj.matrix.6,main="Period 6", vertex.col = "Orange", edge.col= "blue", usearrows = FALSE)
 ```
@@ -194,6 +201,7 @@ library(AER)
 test1.1 <- multinom(group ~ Gender + Marital.Status+University, data = data1.1)
 coeftest(test1.1)
 
+
 #for period 3: 
 test3.1 <- multinom(group ~ Gender + Marital.Status+University, data = data3.1)
 coeftest(test3.1)
@@ -208,32 +216,43 @@ In Period two, we saw a different trend. Marriage status has significant influen
 # ERGM Model
 ```{r}
 #Period 1:
+
 MaritalStatus_1=ergm(net_1~edges+nodematch("Marital.Status"))
 summary(MaritalStatus_1)
 plot(net_1, vertex.col=c("pink","blue")[(get.vertex.attribute(net_1, "Marital.Status"))])
+ggnet2(net_1, mode = "fruchtermanreingold", node.size = 4, color= "orange", label = "Marital.Status" )
 
 #Period 2:
 MaritalStatus_2=ergm(net_2~edges+nodematch("Marital.Status"))
 summary(MaritalStatus_2)
-plot(net_3, vertex.col=c("pink","blue")[(get.vertex.attribute(net_3, "Marital.Status"))])
-
+plot(net_2, vertex.col=c("pink","blue")[(get.vertex.attribute(net_2, "Marital.Status"))])
+ggnet2(net_2, mode = "fruchtermanreingold", node.size = 4, color= "orange", label = "Marital.Status" )
 #Period 3
+
 MaritalStatus_3=ergm(net_3~edges+nodematch("Marital.Status"))
 summary(MaritalStatus_3)
-plot(net_3, vertex.col=c("pink","blue")[(get.vertex.attribute(net_3, "Marital.Status"))])
+plot(net_3ma, vertex.col=c("pink","blue")[(get.vertex.attribute(net_3ma, "Marital.Status"))])
+ggnet2(net_3ma, mode = "fruchtermanreingold", node.size = 4, color= "orange", label = "Marital.Status" )
 
 #Period 6
 MaritalStatus_6=ergm(net_6~edges+nodematch("Marital.Status"))
 summary(MaritalStatus_6)
-plot(net_6, vertex.col=c("pink","blue")[(get.vertex.attribute(net_6, "Marital.Status"))])
+plot(net_6ma, vertex.col=c("pink","blue")[(get.vertex.attribute(net_6ma, "Marital.Status"))])
+ggnet2(net_6ma, mode = "fruchtermanreingold", node.size = 4, color= "orange", label = "Marital.Status" )
 ```
 
-For all three periods when node matching on marital status we see that we obtain a p-value of 0.0266, which is statistically significant.  Meaning that there is a tendency within the network for members of the PIRA with similar marital status have some form of relationship  to each other. This is interesting because it is an under considered version of homophily in that we are often most concerned with the criminal actives of such organizations that there may be very mundane ways to analyze the network. Knowing this it may be worth looking to how marital status relates to the other nodal characteristics. If we had access to the information it could be avantages to look at the types of relationship best described by marital status save for related for marriage, which would give us a valuable perspective of the inner workings of the network. (This is sort of discussion but I’m not sure how to dive it up). 
+For all three periods when node matching on marital status we see that we obtain a p-value of 0.0266, which is statistically significant.  Meaning that there is a tendency within the network for members of the PIRA with similar marital status have some form of relationship  to each other.
 
 
 # Discussion:
+ This is interesting because it is an under considered version of homophily in that we are often most concerned with the criminal actives of such organizations that there may be very mundane ways to analyze the network. Knowing this it may be worth looking to how marital status relates to the other nodal characteristics. If we had access to the information it could be avantages to look at the types of relationship best described by marital status save for related for marriage, which would give us a valuable perspective of the inner workings of the network. 
+
+Limtations:
+
 Ethics: Due to the data having already been collected and published the ethical concerns of the data have hypothetically been addressed. However little is available on how this data was collected, and so we are unsure when in relation to the network the data was collected and the status of the individuals. There is a lot of concern with the vaility and the ethics of collecting data from prisoners, this may have been the case of these individuals. It could have been collected retroactively from events and individuals, but this is likely not the case. When data is collected from inmates it is unlike that the information is truly voluntary. They may also be concerned with confidentiality and refuse to disclose some, more sensitive, information about relatives or significant others in hopes of keeping them safe.
 
 We have some missing data in all of our data sets, due to lack of information, we do not know whether our data is missing at random or not, but we would like to see in the further analysis, whether there will be more data added in or changed, meaning new relationship being formed or old relationship being changed.
+
+
 
 
