@@ -1,5 +1,5 @@
 ---
-title: "Project draft"
+title: "Final Report"
 author: Margaret Perry, Stella Li, Yuqing Geng
 date: "11/28/2018"
 output: pdf_document
@@ -11,14 +11,14 @@ In the past few decades, with the rapid development of social network, governmen
 
 * Based on the interpersonal connection we have, how many friendship groups are there among PIRA members? 
 
-* What contribute to the formation of friendship grouos? And has it changed overtime? 
+* What contribute to the formation of friendship groups? And has it changed overtime? 
 
 We are interested in maping out the the ties between members of PIRA (Provisional Irish Republican Army), estimate how many social groups exist among those PIRA member, and evaluate what node characteristics contribute to the group-membership. In the first pary, we are going to use ERGM node-matching technique to detact common background on PIRA membership; for the second part, we are going to use Bernuilli Block Model to detect how many friendship groups exist among the PIRA members, and what variables contribute to the formation of those memberships. 
 
 # Data: 
 ## 1. Visualizing 
 
-The data that we are using for this experiment was found in the datasets area of the UCINET Software site. According to the site the data was collected by the  International Center for the Study of Terrorism, Pennsylvania State University. The ties are composed of 4 types of relationships involvement in a PIRA activity together, friends before joining PIRA movement, blood relatives, and  related through marriage. According to the data description the network have “binary and symmetric relations between members”. The data covers of the members of the Provisional Irish Republican Army from 1970 to 1998, which the height of the troubles back in Ireland and England. For the members data was collected on information regarding gender, age, marital status, recruiting age, whether or not they attended university, then role and task-related characteristics, lastly brigade membership which is in reference to the cell that the belonged to. The observations are divided in 6 different time periods across the 28 years. However the period 4 and 5 datasets are combined on the website and there is no clear way to distinguish them, but we will not be using this subset in our analysis so it is not our main concern.
+The data that we are using for this experiment was found in the datasets area of the UCINET Software site. According to the site the data was collected by the  International Center for the Study of Terrorism, Pennsylvania State University. The ties are composed of 4 types of relationships involvement in a PIRA activity together, friends before joining PIRA movement, blood relatives, and  related through marriage. According to the data description the network have “binary and symmetric relations between members”. The data covers the members of the Provisional Irish Republican Army from 1970 to 1998, which the height of the troubles back in Ireland and England. For the members data was collected on information regarding gender, age, marital status, recruiting age, whether or not they attended university, then role and task-related characteristics, lastly brigade membership which is in reference to the cell that the belonged to. The observations are divided in 6 different time periods across the 28 years. However the period 4 and 5 datasets are combined on the website and there is no clear way to distinguish them, but we will not be using this subset in our analysis so it is not our main concern.
 
 ```{r, echo=FALSE, results='hide'}
 library(readr)
@@ -29,7 +29,13 @@ library(sand)
 library(blockmodels)
 library(dplyr)
 library(tidyr)
+library(ggplot2)
+library(GGally)
 library(sna)
+library(threejs)
+library(networkD3)
+library(ndtv)
+library(visNetwork)
 library(network)
 data1<-read.csv("CSV/60_PERIOD1_ATTT.csv",na = "99999")
 data2<-read.csv("CSV/60_PERIOD2_ATT.csv",na = "99999")
@@ -64,6 +70,7 @@ class(adj.matrix.6)<-"numeric"
 #Drop nas
 data_1= data1%>%
   drop_na()
+
 
 data_1ma= data1%>%
   drop_na("Marital.Status")
@@ -117,7 +124,7 @@ net_3
 #Results and Visualization
 ```{r, echo=FALSE}
 gplot(adj.matrix.1,main="Period 1", vertex.col="Blue", usearrows = FALSE)
-gplot(adj.matrix.2,main="Period 2", vertex.col="Purple", usearrow= FALSE)
+gplot(adj.matrix.2,main="Period 2", vertex.col="yellow", edge.col = "blue", usearrow= FALSE)
 gplot(adj.matrix.3,main="Period 3", vertex.col = "Orange", edge.col= "blue",usearrows = FALSE)
 gplot(adj.matrix.6,main="Period 6", vertex.col = "Orange", edge.col= "blue", usearrows = FALSE)
 ```
@@ -197,7 +204,10 @@ group_net1<-network(adj.matrix.1, vertex.attr=data1.1[,-1], vertex.attrnames=col
 
 
 plot(group_net1, vertex.color=c("green","pink","red","blue","yellow")[(get.vertex.attribute(group_net1, "group"))])
-
+ggnet2(group_net1, mode = "fruchtermanreingold", node.size = 4, color= "group")
+install.packages("GGally")
+library(GGally)
+ggnet(group_net1, mode = "fruchtermanreingold",node.color = "group", segment.color = "grey50")
 
 ```
 Based on the Bernoulli Blockmodel, we know that period one has estimately 5 groups, and period 3 has estimately 7 groups. The above code are used to mutate the group-membership information to the original datasets. 
@@ -210,11 +220,12 @@ require(reshape2)
 library(AER)
 
 #for period 1:
-test1.1 <- multinom(group ~ Gender + Marital.Status+University, data = data1.1)
+test1.1 <- multinom(group ~ Gender + Marital.Status + University, data = data1.1)
 coeftest(test1.1)
 
+
 #for period 3: 
-test3.1 <- multinom(group ~ Gender + Marital.Status+University, data = data3.1)
+test3.1 <- multinom(group ~ Gender + Marital.Status + University, data = data3.1)
 coeftest(test3.1)
 
 install.packages("plotly")
@@ -229,6 +240,7 @@ plotly(data1.1, x = ~Gender, y = ~Marital.Status, z = ~test1.1, type = "scatter3
            yaxis = list(title = "z"), 
            zaxis = list(title = "probability")))
 ```
+
 Based on the filtered data, we then ran the multinomial regression model on period 1 and period 3 data. The goal is to understand what variable(s) determine which group a certain belongs to. We choose three major variable: whether or not went to university, marital status, and gender. The hypothesis is that people are more likely to be with people with similar background (married ppl are more likely to befriend with married ppl, etc.). 
 
 In period one, we saw that marital status among the five groups does not have statistically significant distinguish the probability to belong to group1 comparing to belonging to any other groups (p-value >0.05 for group 2-4, indicating that marital status variable does not have significant effect on distinguishing them from group 1). The other two variable, "University" and "Gender", however, has great influence. We can conclude that in period one, gender and education level contribute significantly on who PIRA members befriend with. 
@@ -238,37 +250,60 @@ In Period two, we saw a different trend. Marriage status has significant influen
 # ERGM Model
 ```{r}
 #Period 1:
+
+
+#make marrital status non-zero: 
+data_1ma_2<-data_1ma %>%
+  mutate(Marital.Status=Marital.Status+1)
+net_1_2= network(adj.matrix.1, vertex.attr = data_1ma_2[,-1], vertex.attrnames = colnames(data_1ma_2[,-1]), directed=F, hyper=F, loops=F, multiple=F, bipartite=F)
+ggnet2(net_1_2, mode = "fruchtermanreingold", node.size = 4, color="Marital.Status" )
+
+
+
+
 MaritalStatus_1=ergm(net_1~edges+nodematch("Marital.Status"))
 summary(MaritalStatus_1)
 plot(net_1, vertex.col=c("pink","blue")[(get.vertex.attribute(net_1, "Marital.Status"))])
+ggnet2(net_1, mode = "fruchtermanreingold", node.size = 4, color= "orange", label = "Marital.Status" )
 
 #Period 2:
 MaritalStatus_2=ergm(net_2~edges+nodematch("Marital.Status"))
 summary(MaritalStatus_2)
-plot(net_3, vertex.col=c("pink","blue")[(get.vertex.attribute(net_3, "Marital.Status"))])
-
+plot(net_2, vertex.col=c("pink","blue")[(get.vertex.attribute(net_2, "Marital.Status"))])
+ggnet2(net_2, mode = "fruchtermanreingold", node.size = 4, color= "orange", label = "Marital.Status" )
 #Period 3
+
 MaritalStatus_3=ergm(net_3~edges+nodematch("Marital.Status"))
 summary(MaritalStatus_3)
-plot(net_3, vertex.col=c("pink","blue")[(get.vertex.attribute(net_3, "Marital.Status"))])
+plot(net_3ma, vertex.col=c("pink","blue")[(get.vertex.attribute(net_3ma, "Marital.Status"))])
+ggnet2(net_3ma, mode = "fruchtermanreingold", node.size = 4, color= "orange", label = "Marital.Status" )
 
 #Period 6
 MaritalStatus_6=ergm(net_6~edges+nodematch("Marital.Status"))
 summary(MaritalStatus_6)
-plot(net_6, vertex.col=c("pink","blue")[(get.vertex.attribute(net_6, "Marital.Status"))])
+plot(net_6ma, vertex.col=c("pink","blue")[(get.vertex.attribute(net_6ma, "Marital.Status"))])
+ggnet2(net_6ma, mode = "fruchtermanreingold", node.size = 4, color= "orange", label = "Marital.Status" )
 ```
 
-For all three periods when node matching on marital status we see that we obtain a p-value of 0.0266, which is statistically significant.  Meaning that there is a tendency within the network for members of the PIRA with similar marital status have some form of relationship  to each other. This is interesting because it is an under considered version of homophily in that we are often most concerned with the criminal actives of such organizations that there may be very mundane ways to analyze the network. Knowing this it may be worth looking to how marital status relates to the other nodal characteristics. If we had access to the information it could be avantages to look at the types of relationship best described by marital status save for related for marriage, which would give us a valuable perspective of the inner workings of the network. (This is sort of discussion but I’m not sure how to dive it up). 
+For all three periods when node matching on marital status we see that we obtain a p-value of 0.0266, which is statistically significant.  Meaning that there is a tendency within the network for members of the PIRA with similar marital status have some form of relationship  to each other.
 
 
 # Discussion:
+ This is interesting because it is an under considered version of homophily in that we are often most concerned with the criminal actives of such organizations that there may be very mundane ways to analyze the network. Knowing this it may be worth looking to how marital status relates to the other nodal characteristics. If we had access to the information it could be avantages to look at the types of relationship best described by marital status save for related for marriage, which would give us a valuable perspective of the inner workings of the network. 
+
+Limtations:
+
 Ethics: Due to the data having already been collected and published the ethical concerns of the data have hypothetically been addressed. However little is available on how this data was collected, and so we are unsure when in relation to the network the data was collected and the status of the individuals. There is a lot of concern with the vaility and the ethics of collecting data from prisoners, this may have been the case of these individuals. It could have been collected retroactively from events and individuals, but this is likely not the case. When data is collected from inmates it is unlike that the information is truly voluntary. They may also be concerned with confidentiality and refuse to disclose some, more sensitive, information about relatives or significant others in hopes of keeping them safe.
 
 We have some missing data in all of our data sets, due to lack of information, we do not know whether our data is missing at random or not, but we would like to see in the further analysis, whether there will be more data added in or changed, meaning new relationship being formed or old relationship being changed.
 
 # Bibliography  
 
+<<<<<<< HEAD
 “Lethal Connections: The Determinants of Network Connections in the Provisional Irish Republican Army, 1970–1998.” Taylor and Francis Online, www.tandfonline.com/doi/full/10.1080/03050629.2013.863190.
 
 https://sites.google.com/site/ucinetsoftware/datasets/covert-networks/provisionalirishrepublicanarmy (dataset)
+=======
+
+>>>>>>> 1ab99d05afd136b5bd3fbc75e0d28be1761741c5
 
