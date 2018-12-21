@@ -1,28 +1,35 @@
 ---
 title: "Final Report"
 author: Margaret Perry, Stella Li, Yuqing Geng
-date: "11/28/2018"
+date: "12/21/2018"
 output: pdf_document
 editor_options: 
   chunk_output_type: inline
 ---
+
+```{r include = FALSE}
+knitr::opts_chunk$set(echo=FALSE)
+```
+
+# Abstract:
+
+The Provisional Irish Republican Army (PIRA) was a terrorist group that was formed after the Irish revolution. We are examining and analyzing the descriptive capabilities of homophily attributes, namely marital status and other mundane node attributes, on grouping within the PIRA. To answer our questions, we used a combination of three different models: exponential random graph model (ERGM), the stochastic block model, and multinomial logistic regression. First we used ERGM to examine the importance of marital status in the formation of the network and found that for all the time periods we examined, save for period 6, that marital status was a significant factor in whether two nodes were connected. Next, we used the combination of the Bernoulli block model and multinomial logistic regression to find the groups within each period then determine what factors help to identify group membership. With those three models, we can explore the formation of social network groups among PIRA members.
+
 # Introduction:
-In the past few decades, with the rapid development of social network, governments around the world have adopted it for anti-terrorism and anti-insurgency purposes. Today we are going to use social network to detect friendship among terriorists in Ireland, who are commonly called PIRA (Provisional Irish Republican Army). Under the Brexit background, people's attention has been brought back to the longstanding issue between northern Ireland and Britain.Thus this study will help us under the following questions: 
 
-* What are some common background information among PIRA members? 
+The use of social network analysis on terrorist organizations is not particularly new. Networks of this nature are often referred to as darknets due to the risk of inaccurate and possible biases. However, even the newest period of our data was collected 20 years prior to our analysis, and none of the information provides identifying; thus there is very little risk involved in our research. 
+Rather than focusing on activities and other commonly explored reasons of social group forming, we decide to explore the impact of marital status and other human-central elements. In the past years, terrorists are usually depicted dehumanized, and thus not many researches have explored the influence of human-centuraled elements among terrorists’ social behavior. WIth our research, such a blank can be filled.
+Using data about PIRA members from 1970 to 1998, the period which they were most active, we can have a better understanding of terrorists’ social behaviors. PIRA is a terrorist organization that formed in Northern Ireland in hope of freeing the region and reunify Ireland as a whole. However the conflict was not confine to this one country, according to the New York Times, “The I.R.A. drew significant support from groups as disparate as Irish-Americans in the United States and the Libyan dictator Muammar el-Qaddafi, who supplied significant amounts of arms and powerful explosives.”(Cowell).  By examining the mundane attributes, focusing on the marital status of an individual, we will discover how outside factors lead the formation of edges for groups, and eventually find correlation between this and possible other attributes of interest. Additionally, we are interested in mapping out the the ties between members of PIRA, estimate how many social groups exist among those PIRA members, and evaluate what node characteristics contribute to the group-membership. 
+In the first part, we are going to use ERGM node-matching technique to detect common background on PIRA membership; for the second part, we are going to use Bernoulli Block Model to detect potential social groups, and then use Multinomial Regression to explore variables which contribute to group membership. This will give us an overall sense what groups that model believes exist, visualizing this will give us insight to the structure of the group and large and help us contextualize our other findings. 
 
-* Based on the interpersonal connection we have, how many friendship groups are there among PIRA members? 
+# Data:
+ 
+The data that we are using is from the time period 1970 to 1998, which is often referred to as the Troubles. This was a time of heightened terrorist activity in Northern Ireland in attempts to force its independence. They see themselves as a successor to the original Irish Republican Army, which was the revolutionary group that lead to the freedom of Ireland in 1920. 
 
-* What contribute to the formation of friendship groups? And has it changed overtime? 
+The data for this experiment was found in the datasets area of the UCINET Software site. According to the site, the data was collected by the International Center for the Study of Terrorism, Pennsylvania State University. The ties are composed of 4 types of relationships involvement in a PIRA activity together, friends before joining PIRA movement, blood relatives, and related through marriage. The network has “binary and symmetric relations between members”. The data covers the members of the Provisional Irish Republican Army from 1970 to 1998, which was the height of the troubles back in Ireland and England. For the members, data was collected on information regarding gender, age, marital status, recruiting age, whether or not they attended university, then role and task-related characteristics, lastly brigade membership which is in reference to the cell that the belonged to. The observations are divided in 6 different time periods across the 28 years. However the period 4 and 5 are combined into one set on the website, and so there is no clear way to distinguish them, but we will not be using this subset in our analysis so it is not our main concern.
 
-We are interested in maping out the the ties between members of PIRA (Provisional Irish Republican Army), estimate how many social groups exist among those PIRA member, and evaluate what node characteristics contribute to the group-membership. In the first pary, we are going to use ERGM node-matching technique to detact common background on PIRA membership; for the second part, we are going to use Bernuilli Block Model to detect how many friendship groups exist among the PIRA members, and what variables contribute to the formation of those memberships. 
 
-# Data: 
-## 1. Visualizing 
-
-The data that we are using for this experiment was found in the datasets area of the UCINET Software site. According to the site the data was collected by the  International Center for the Study of Terrorism, Pennsylvania State University. The ties are composed of 4 types of relationships involvement in a PIRA activity together, friends before joining PIRA movement, blood relatives, and  related through marriage. According to the data description the network have “binary and symmetric relations between members”. The data covers the members of the Provisional Irish Republican Army from 1970 to 1998, which the height of the troubles back in Ireland and England. For the members data was collected on information regarding gender, age, marital status, recruiting age, whether or not they attended university, then role and task-related characteristics, lastly brigade membership which is in reference to the cell that the belonged to. The observations are divided in 6 different time periods across the 28 years. However the period 4 and 5 datasets are combined on the website and there is no clear way to distinguish them, but we will not be using this subset in our analysis so it is not our main concern.
-
-```{r, echo=FALSE, results='hide'}
+```{r, echo=FALSE, results='hide', include=FALSE}
 library(readr)
 library(igraph)
 library(sna)
@@ -93,10 +100,9 @@ data_6ma= data6%>%
   drop_na("Marital.Status")
 ```
 
+# Method 
 
-#Method
-
-```{r, results='hide' }
+```{r, results='hide', include=FALSE}
 # creating networks
 net_1= network(adj.matrix.1, vertex.attr = data_1ma[,-1], vertex.attrnames = colnames(data1[,-1]), directed=F, hyper=F, loops=F, multiple=F, bipartite=F)
 
@@ -119,15 +125,14 @@ net_3ma= network(adj.matrix.3, vertex.attr = data_3ma[,-1], vertex.attrnames = c
 net_3
 ```
 
-#Results and Visualization
-```{r, echo=FALSE}
-gplot(adj.matrix.1,main="Period 1", vertex.col="Blue", usearrows = FALSE)
-gplot(adj.matrix.2,main="Period 2", vertex.col="yellow", edge.col = "blue", usearrow= FALSE)
-gplot(adj.matrix.3,main="Period 3", vertex.col = "Orange", edge.col= "blue",usearrows = FALSE)
-gplot(adj.matrix.6,main="Period 6", vertex.col = "Orange", edge.col= "blue", usearrows = FALSE)
-```
-# Bernoulli Block Model
-```{r, results='hide'}
+##Bernoulli Blockmodel
+
+In order to understand how people are connected, we applied the Bernoulli Blockmodel to the edge connection among the three time periods. By doing so, we can see the estimated number of groups within each time period. We will also be able to see the probability each individual belong to each of these groups. 
+
+By assigning people to the group they have more than 50% chance to be in, we created new matrices-- "test1"" for period 1 and "test3"" for period 3. Those two matrices can tell us whether or not an individual is in certain group (TRUE/FALSE expression). In order to use the group-membership information alone with other variables, we mutated a new column to our original datasets which include information about node characteristics. This new column, called "group", we used number to indicate which group each individual belongs to. We can then use this information to understand what makes an individual in a certain group.The code are used to add the group-membership information onto the original datasets. 
+
+
+```{r, results='hide', include=FALSE}
 my_model<-function(x){
   BM_bernoulli("SBM",x,
 verbosity=6,
@@ -168,14 +173,9 @@ test6=my_model.period6$memberships[[estimate.period6]]$Z>0.5
 test6
 ```
 
-In order to understand how people are connected, we applied the Bernoulli blockmodel to the edge connection among the three time periods.By doing so, we can see the estimate number of groups within each time period has. We will also be able to see the probability each individual belong to each of these groups. 
-
-By assigning people to the group they have more than 50% chance to be in, we created new matrices-- "test1"" for period 1 and "test3"" for period 3. Those two matrices can tell us whether or not an individual is in certain group. In order to use the group-membership information alone with other variables, we mutated a new column to our original datasets which include information about node characteristics. This new column, called "group", use number to indicate which group each individual belongs to. We can then use this information to understand what makes an individual in one group but not another. 
-
-Note that we tried to run the estimate group function for all three time periods. However, it only works for the first and the third period. We changed the min and max number of group inside the Bernoulli model and re-examine the adjacency matrix for period 2, but it still does not work. So in the following part we will just focus on period 1 and 3. 
 
 
-```{r,echo=FALSE, results='hide'}
+```{r,echo=FALSE, results='hide', include=FALSE}
 # Adding group variable to dataset "data1", named "data1.2"
 #period 1 cleared data
 test1.3=data.frame(test1)
@@ -217,6 +217,9 @@ group_net3<-network(adj.matrix.3, vertex.attr=data3.1[,-1], vertex.attrnames=col
 
 group_net6<-network(adj.matrix.6, vertex.attr=data6.1[,-1], vertex.attrnames=colnames(data6.1[,-1]),
                 directed=F, hyper=F, loops=F, multiple=F, bipartite=F)
+```
+
+```{r}
 ggnet2(group_net1, mode = "fruchtermanreingold", node.size = 4, palette = "Set2",color= "group", legend.size=30)+
   ggtitle("period 1")
 ggnet2(group_net3, mode = "fruchtermanreingold", node.size = 4, palette = "Set2",color= "group", legend.size=30)+
@@ -224,10 +227,14 @@ ggnet2(group_net3, mode = "fruchtermanreingold", node.size = 4, palette = "Set2"
 ggnet2(group_net6, mode = "fruchtermanreingold", node.size = 4, palette = "Set2",color= "group", legend.size=30) +ggtitle("period 6")
 
 ```
-Based on the Bernoulli Blockmodel, we know that period one has estimately 5 groups, and period 3 has estimately 7 groups. The above code are used to mutate the group-membership information to the original datasets. 
 
-#Multinomial Logistic Regression --assume independent observation --plot 
-```{r, echo=FALSE}
+##Multinomial Logit Regress 
+
+Based on the filtered data, we then ran the multinomial logistic regression model on period 1, period 3, and period 6 data (period 2 data has technical difficulties in Block model as mentioned before, thus we cannot examine the indicator variables for it). The goal is to understand what variable(s) determine which group a certain PIRA member belongs to. We chose four variables: “Gender”, “University” (whether the individual went to university), “Marital Status”, and “Recruitment Age”. The hypothesis is that people are more likely to be with others who share the similar background (married ppl are more likely to befriend with married ppl, etc.). 
+
+The Logistic Regression Model shows how likely each variable can distinguish other social groups from group 1 and predict the probabilities of the different possible outcomes of “Group” (social group membership) given “Gender”, “University”, “Marital Status”, and “Recruitment Age”. A small p-value (p<0.05) indicates a higher likelihood a certain indicator variable can work as an indicator variable. 
+
+```{r, echo=FALSE, results='hide', include=FALSE}
 require(nnet)
 require(ggplot2)
 require(reshape2)
@@ -247,14 +254,21 @@ test6.1 <- multinom(group ~ Gender+Marital.Status + University+Age.at.Recruitmen
 coeftest(test6.1)
 ```
 
-Based on the filtered data, we then ran the multinomial regression model on period 1 and period 3 data. The goal is to understand what variable(s) determine which group a certain belongs to. We choose three major variable: whether or not went to university, marital status, and gender. The hypothesis is that people are more likely to be with people with similar background (married ppl are more likely to befriend with married ppl, etc.). 
+Here is the result for period 1,period3, and period 6: 
 
-In period one, we saw that marital status among the five groups does not have statistically significant distinguish the probability to belong to group1 comparing to belonging to any other groups (p-value >0.05 for group 2-4, indicating that marital status variable does not have significant effect on distinguishing them from group 1). The other two variable, "University" and "Gender", however, has great influence. We can conclude that in period one, gender and education level contribute significantly on who PIRA members befriend with. 
-
-In Period two, we saw a different trend. Marriage status has significant influence on the chance of being assigned into certain for most of the time; only in group 2 this variable does not has a significant p-value. The other two variables work efficiently for all seven groups. Thus we can conclude that in most cases at period 2, PIRA members' friend choices is heavily influenced by their marriage status, gender, and education background. 
-
-# ERGM Model
 ```{r}
+coeftest(test1.1)
+coeftest(test3.1)
+coeftest(test6.1)
+
+```
+
+##ERGM
+
+For our exponential random graph model (ERGM) we ran periods 1, 2, 3, and 6. For each of these time periods we ran on edges, which attempts to build model similar to the original model based on the edges that exist,  and nodes match, which is an argument in the code that attempts to build a similar network based on the status of the node attribute being called, for marital status. We after this we look at the node attributes for the education of an individual and the age of recruitment, but only some of the periods yield interesting results with these attributes. The main issue we ran into with many of the possible arguments for this model was that there was a noticeable lack in interptiblity for complex models of this type. We also ran in to an issue when we were first attempting to run the model because of how we formed our networks that the column names did not line up with the correct attribute which gave us wildly incorrect results the first time we ran through these models and so we had to run them a second time with the corrected networks to obtain usable results. In addition to this, for our ERGM networks we drop all observations with missing values for marital status as to avoid any underlying issues that may come of that.
+
+
+```{r, echo=FALSE, results='hide'}
 #Period 1:
 
 
@@ -290,21 +304,46 @@ plot(net_6ma, vertex.col=c("pink","blue")[(get.vertex.attribute(net_6ma, "Marita
 ggnet2(net_6ma, mode = "fruchtermanreingold", node.size = 4, color= "orange", label = "Marital.Status" )
 ```
 
-For all three periods when node matching on marital status we see that we obtain a p-value of 0.0266, which is statistically significant.  Meaning that there is a tendency within the network for members of the PIRA with similar marital status have some form of relationship  to each other.
+Here are the graphs for ERGM in Period 1, 2, 3, 6:
 
+```{r}
+ggnet2(net_1, mode = "fruchtermanreingold", node.size = 4, color= "orange", label = "Marital.Status" )
+ggnet2(net_3ma, mode = "fruchtermanreingold", node.size = 4, color= "orange", label = "Marital.Status" )
+ggnet2(net_6ma, mode = "fruchtermanreingold", node.size = 4, color= "orange", label = "Marital.Status" )
+
+```
+
+# Result 
+
+Based on the Bernoulli Blockmodel, we found 5 estimated social groups in period 1, 7 in period 3, and 4 in period 6.  Our definition of “being in one specific group” means the probability an individual belongs to a group is greater than 50%, but based on the Bernoulli Blockmodel’s calculation, the likelihood for an individual being in the most likely group is usually greater than 90%, and there are only less than 5% probability that it belongs to other groups. So we are pretty confident that our group membership, based on calculation, is accurate. 
+
+Note that we tried to run the Bernoulli Blockmodel on period 2 too, but for unknown reasons it kept report error. We changed the minimum and maximum number of group inside the Bernoulli Blockmodel and re-examine the adjacency matrix for period 2, but it still was not work. So in the following part we will just focus on period 1, 3, and 6. 
+
+The Logistic Regression Model shows what are major indicator variables for group memberships among those three time periods.
+
+In period 1, we saw that “Marital Status” can significantly distinguish the probability of being in groups other than group 1 (p-value <0.05 for all but group3, indicating this indicator variable works well for distinguishing most groups). “Gender” is also significant for all groups. The other two variable, "University" and “Recruitment Age”, however, has less influence. They have p-value >0.05 for almost all groups, indicating that they cannot welly distinguish each group as indicator variables. We can then conclude that in period one, “Gender” and “Marital Status” contribute significantly on who PIRA members befriend with. 
+
+Period 2 cannot be accessed due to unknown technical difficulties as mentioned before. 
+In Period 3, we saw a different trend. “Gender” is no longer significant. Instead, “Marital Status” has significant influence group membership as indicated by the p-value for each group; “University” becomes significant in two out of seven groups, and “Recruitment Age” is also more significant comparing with period 1. Thus we can conclude that in most cases at period 2, PIRA members' friend choices is heavily influenced by their “Marital Status”, education background, and “Recruitment Age”. 
+
+In Period 6, we saw a new trend. “Gender” and “University” become new key indicator variables, while the other two, “Recruitment Age” and “Marital Status” become insignificant. As we can see from those three time periods, with the passing of time, the key determinants of  the formation of social group is changing too. But our hypothesis is partially correct: people do like to form relationship with others who share some kind of similar background. 
+
+In our ERGM models, we see that for first three of the four periods we have obtain an extremely small p-value, which indicates that marital status is a statistically significant attribute in formation of the network. This indicates to us that within this network of  members of the PIRA that there is pattern for members with similar martial statuses to linked by one of the four edge types described earlier in the paper. However it should be noted that in period 6 while the p-value was close it was not low enough to be considered statistically significant. 
 
 # Discussion:
- This is interesting because it is an under considered version of homophily in that we are often most concerned with the criminal actives of such organizations that there may be very mundane ways to analyze the network. Knowing this it may be worth looking to how marital status relates to the other nodal characteristics. If we had access to the information it could be avantages to look at the types of relationship best described by marital status save for related for marriage, which would give us a valuable perspective of the inner workings of the network. 
+In this study, we examined the general characteristic, marital status, of PIRA members. However, we are also interested in learning whether or not the marriage link between PIRA members has any contribution to the formation of social group.If we had access to the information it could be avantages to look at the types of relationship best described by marital status save for related for marriage, which would give us a valuable perspective of the inner workings of the network.
+ 
+Since we are only including marital status in this model, the information revealed from the output might be limited and biased. For example, we are not sure whether two nodes connected solely with each other exclusively mean that they are married to each other or just simply mean they are connected because they share ties with married people. In the future, we would like to add in the gender characteristic, so we can have a more accurate interpretation of the model. We did not originally consider this factor because how the data describes the edges none are form through relationships formed during membership in the PIRA. However, the edge type related through marriage may encapsulate this. There is a concerned since we are unable to determine the type of edge that connects to nodes, and therefore the actual structure within the network. In the future we hope to find the original data set so that we may have access to this information.
+ 
+Due to the data having already been collected and published, we assume the ethical concerns of the data have hypothetically been addressed. However, little is available on how this data was collected, therefore we have concerns we regarding the timeline of collection and the status of the individual at that point. There is a lot of concern with the validity and the ethics of collecting data from prisoners, this may have been the case with our dataset. It could have been collected retroactively from events and individuals, but this is likely not the case. When data is collected from inmates it is unlikely that the information is voluntary, and there are concerns with confidentiality. This may lead to individuals refusing to disclose more sensitive information about relatives or significant others in hopes of keeping them safe.
+ 
+Besides, we have some missing data in all of our data sets, due to lack of information, we do not know whether our data is missing completely at random or not. The research can only be carried out under the missing completely at random assumption, but in the future, we would like to analyze the individuals who have certain background information missing (Eg: some have missing marital status, some have missing education background), and see whether there exists certain kind of relationship between them. 
 
-Limtations:
+Furthermore, since we have data from multiple time period, we are also interested in seeing how new relationships are formed or old relationships are changed overtime. Since this is beyond the scope of answering our initial question, we didn’t involve it into our study. 
 
-Ethics: Due to the data having already been collected and published the ethical concerns of the data have hypothetically been addressed. However little is available on how this data was collected, and so we are unsure when in relation to the network the data was collected and the status of the individuals. There is a lot of concern with the vaility and the ethics of collecting data from prisoners, this may have been the case of these individuals. It could have been collected retroactively from events and individuals, but this is likely not the case. When data is collected from inmates it is unlike that the information is truly voluntary. They may also be concerned with confidentiality and refuse to disclose some, more sensitive, information about relatives or significant others in hopes of keeping them safe.
+# Citation 
 
-We have some missing data in all of our data sets, due to lack of information, we do not know whether our data is missing at random or not, but we would like to see in the further analysis, whether there will be more data added in or changed, meaning new relationship being formed or old relationship being changed.
+Provisional Irish Republican Army - UCINET Software.” Google Sites, sites.google.com/site/ucinetsoftware/datasets/covert-networks/provisionalirishrepublicanarmy.
+Slavens, Kate. “Violence Returns to the Streets of Northern Ireland.” Penn State University, 2017, news.psu.edu/story/268437/2013/03/13/research/violence-returns-streets-northern-ireland.
+Cowell, Alan. “50 Years Later, Troubles Still Cast 'Huge Shadow' Over Northern Ireland.” The New York Times, The New York Times, 5 Oct. 2018, www.nytimes.com/2018/10/04/world/europe/northern-ireland-troubles.html.
 
-# Bibliography  
-
-
-“Lethal Connections: The Determinants of Network Connections in the Provisional Irish Republican Army, 1970–1998.” Taylor and Francis Online, www.tandfonline.com/doi/full/10.1080/03050629.2013.863190.
-
-https://sites.google.com/site/ucinetsoftware/datasets/covert-networks/provisionalirishrepublicanarmy (dataset)
