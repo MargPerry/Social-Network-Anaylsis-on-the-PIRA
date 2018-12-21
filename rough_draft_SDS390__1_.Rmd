@@ -259,8 +259,7 @@ net_1_2= network(adj.matrix.1, vertex.attr = data_1ma_2[,-1], vertex.attrnames =
 ggnet2(net_1_2, mode = "fruchtermanreingold", node.size = 4, color="Marital.Status" )
 
 
-
-
+#period 1:
 MaritalStatus_1=ergm(net_1~edges+nodematch("Marital.Status"))
 summary(MaritalStatus_1)
 plot(net_1, vertex.col=c("pink","blue")[(get.vertex.attribute(net_1, "Marital.Status"))])
@@ -271,8 +270,8 @@ MaritalStatus_2=ergm(net_2~edges+nodematch("Marital.Status"))
 summary(MaritalStatus_2)
 plot(net_2, vertex.col=c("pink","blue")[(get.vertex.attribute(net_2, "Marital.Status"))])
 ggnet2(net_2, mode = "fruchtermanreingold", node.size = 4, color= "orange", label = "Marital.Status" )
-#Period 3
 
+#Period 3
 MaritalStatus_3=ergm(net_3~edges+nodematch("Marital.Status"))
 summary(MaritalStatus_3)
 plot(net_3ma, vertex.col=c("pink","blue")[(get.vertex.attribute(net_3ma, "Marital.Status"))])
@@ -299,11 +298,7 @@ We have some missing data in all of our data sets, due to lack of information, w
 
 # Bibliography  
 
-<<<<<<< HEAD
+
 “Lethal Connections: The Determinants of Network Connections in the Provisional Irish Republican Army, 1970–1998.” Taylor and Francis Online, www.tandfonline.com/doi/full/10.1080/03050629.2013.863190.
 
 https://sites.google.com/site/ucinetsoftware/datasets/covert-networks/provisionalirishrepublicanarmy (dataset)
-=======
-
->>>>>>> 1ab99d05afd136b5bd3fbc75e0d28be1761741c5
-
